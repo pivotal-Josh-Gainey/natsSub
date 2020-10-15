@@ -13,7 +13,7 @@ public class NatsSub {
     Connection natsConnection;
     AsyncSubscription subscription;
 
-    public NatsSub() {
+    public void connect() {
         try {
             natsConnection = initConnection();
         } catch (IOException e) {
@@ -21,12 +21,24 @@ public class NatsSub {
         }
     }
 
-    private Connection initConnection() throws IOException {
+    public void disconnect(){
+        if(natsConnection != null){
+            try {
+                natsConnection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    public Connection initConnection() throws IOException {
         Options options = new Options.Builder()
                 .errorCb(ex -> Utils.logError("Connection Exception: " + ex))
                 .disconnectedCb(event -> Utils.logError("Channel disconnected: {}" + event.getConnection()))
                 .reconnectedCb(event -> Utils.logError("Reconnected to server: {}" + event.getConnection()))
                 .build();
+
 
         return Nats.connect(System.getenv("NATSAPI"), options);
     }
